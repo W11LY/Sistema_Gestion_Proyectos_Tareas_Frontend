@@ -12,13 +12,36 @@ export default async function action_get_client(token: string): Promise<{ succes
             },
         });
 
-        const result = await res.json();
+        // leemos encabezado de headder
+        const contentType = res.headers.get('content-type') || '';
 
-        if (!res.ok) {
-            return { success: false, message: result.message || 'No se pudo cargar los datos' };
+        let errorMessage = 'Error desconocido';
+
+        if (contentType.includes('application/json')) {
+            // El backend responde JSON manejamos errores
+            const result = await res.json();
+
+            if (Array.isArray(result.errors)) {
+                return {
+                    success: false,
+                    message: result.message || 'Error al cargar el perfil',
+                };
+            } else {
+                return {
+                    success: true,
+                    message: result.message || 'Perfil cargado exitosamente',
+                    data: result
+                };
+            }
+        } else if (contentType.includes('text/plain')) {
+            // El backend responde texto plano manejamos errores
+            errorMessage = await res.text();
         }
 
-        return { success: true, data: result };
+        return {
+            success: false,
+            message: errorMessage,
+        };
     } catch (error: any) {
         return { success: false, message: error.message || 'Error de red' };
     }

@@ -34,7 +34,7 @@ export default function FormProfile({ getClient, type, getStateUpdate }: formPro
 
                     <div>
                         <label htmlFor="password2" className="labelConfig"></label>
-                        <input type="password" placeholder="Confirmar Contraseña" name="password1" id="password2" className="inputConfig"/>
+                        <input type="password" placeholder="Confirmar Contraseña" name="password2" id="password2" className="inputConfig"/>
                     </div>
                 </>
             )}

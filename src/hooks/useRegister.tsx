@@ -14,7 +14,7 @@ export default function useRegister() {
 
         const data: typeClientResponse = {
             names: formData.get('names') as string,
-            lastnames: formData.get('lastNames') as string,
+            lastnames: formData.get('lastnames') as string,
             email: formData.get('email') as string,
             phone: formData.get("phone") as string,
             password: formData.get("password1") as string,

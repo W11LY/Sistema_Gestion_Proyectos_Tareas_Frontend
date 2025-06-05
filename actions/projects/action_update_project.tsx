@@ -18,22 +18,38 @@ export default async function action_update_project(data: typeProjectResponse, p
             return { success: true, message: 'Projecto actualizada correctamente' };
         }
 
-        const result = await res.json();
+        // leemos encabezado de headder
+        const contentType = res.headers.get('content-type') || '';
 
-        if (!res.ok) {
-            // manejo de errores del backend por validaciones devuelve list
-            const errors = Array.isArray(result.errors)
-                ? result.errors.map((err: any) => err.defaultMessage || 'Error desconocido')
-                : [];
+        let errorMessage = 'Error desconocido';
 
-            return {
-                success: false,
-                message: result.message || 'Error de validación',
-                errors,
-            };
+        if (contentType.includes('application/json')) {
+            // El backend responde JSON manejamos errores
+            const result = await res.json();
+
+            if (Array.isArray(result.errors)) {
+                const errors = result.errors.map((err: any) => err.defaultMessage || 'Error desconocido');
+                return {
+                    success: false,
+                    message: result.message || 'Error al actualizar el proyecto intente nuevamente',
+                    errors,
+                };
+            } else {
+                return {
+                    success: true,
+                    message: result.message || 'Projecto actualizada correctamente',
+                };
+            }
+        } else if (contentType.includes('text/plain')) {
+            // El backend responde texto plano manejamos errores
+            errorMessage = await res.text();
         }
 
-        return { success: true, message: result.message || 'Projecto actualizada correctamente' };
+        return {
+            success: false,
+            message: errorMessage,
+        };
+
     } catch (error: any) {
         return { success: false, message: error.message || 'Error de red' };
     }

@@ -14,23 +14,38 @@ export default async function action_create_client(data: typeClientResponse): Pr
             return { success: true, message: 'Se ha registrado correctamente' };
         }
 
-        const result = await res.json();
+        // leemos encabezado de headder
+        const contentType = res.headers.get('content-type') || '';
 
-        if (!res.ok) {
-            // manejo de errores del backend por validaciones devuelve list
-            const errors = Array.isArray(result.errors)
-                ? result.errors.map((err: any) => err.defaultMessage || 'Error desconocido')
-                : [];
+        let errorMessage = 'Error desconocido';
 
-            return {
-                success: false,
-                message: result.message || 'Error de validación',
-                errors,
-            };
+        if (contentType.includes('application/json')) {
+            // El backend responde JSON manejamos errores
+            const result = await res.json();
+
+            if (Array.isArray(result.errors)) {
+                const errors = result.errors.map((err: any) => err.defaultMessage || 'Error desconocido');
+                return {
+                    success: false,
+                    message: result.message || 'Error de validación',
+                    errors,
+                };
+            }
+            errorMessage = result.message || errorMessage;
+        } else if (contentType.includes('text/plain')) {
+            // El backend responde texto plano manejamos errores
+            errorMessage = await res.text();
         }
 
-        return { success: true, message: 'Se ha registrado correctamente' };
+        return {
+            success: false,
+            message: errorMessage,
+        };
+
     } catch (error: any) {
-        return { success: false, message: error.message || 'Error de red' };
+        return {
+            success: false,
+            message: error.message || 'Error de red',
+        };
     }
 }

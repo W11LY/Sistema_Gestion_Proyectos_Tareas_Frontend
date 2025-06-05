@@ -17,13 +17,25 @@ export default async function action_validation_token(token: string): Promise<{ 
             return { success: false, message: 'Seccion Caducada' };
         }
 
-        const result = await res.json();
+        // leemos encabezado de headder
+        const contentType = res.headers.get('content-type') || '';
 
-        if (!res.ok) {
-            return { success: false, message: result.message || 'No se pudo validar el token' };
+        let errorMessage = 'Error desconocido';
+
+        if (contentType.includes('application/json')) {
+            // El backend responde JSON manejamos errores
+            return {
+                success: true,
+            };
+        } else if (contentType.includes('text/plain')) {
+            // El backend responde texto plano manejamos errores
+            errorMessage = await res.text();
         }
 
-        return { success: true };
+        return {
+            success: false,
+            message: errorMessage,
+        };
     } catch (error: any) {
         return { success: false, message: error.message || 'Error de red' };
     }

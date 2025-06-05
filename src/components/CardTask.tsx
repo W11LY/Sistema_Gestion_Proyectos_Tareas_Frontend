@@ -65,7 +65,7 @@ export default function CardTask({ task, updateListTask, deleteListTask, updateL
                     </div>
 
                     <div className="mt-4">
-                        <input type="text" placeholder="Para eliminar escriba: Eliminar" className="inputConfig"/>
+                        <input type="text" name="delete" placeholder="Para eliminar escriba: Eliminar" className="inputConfig"/>
                         <input type="submit" className="buttonConfig mt-3" value="Crear" />
                     </div>
                 </form>

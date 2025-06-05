@@ -13,19 +13,31 @@ export default async function action_delete_task(taskId: number, token: string):
 
         // retorna no content no hay error
         if (res.status === 204) {
-            return { success: true, message: 'tarea eliminada correctamente' };
+            return { success: true, message: 'Tarea eliminada correctamente' };
         }
 
-        const result = await res.json();
+        // leemos encabezado de headder
+        const contentType = res.headers.get('content-type') || '';
 
-        if (!res.ok) {
+        let errorMessage = 'Error desconocido';
+
+        if (contentType.includes('application/json')) {
+            // El backend responde JSON manejamos errores
+            const result = await res.json();
+
             return {
-                success: false,
-                message: result.message || 'Error de validación',
+                success: true,
+                message: result.message || 'Tarea eliminada correctamente',
             };
+        } else if (contentType.includes('text/plain')) {
+            // El backend responde texto plano manejamos errores
+            errorMessage = await res.text();
         }
 
-        return { success: true, message: result.message || 'Tarea actualizada correctamente' };
+        return {
+            success: false,
+            message: errorMessage,
+        };
     } catch (error: any) {
         return { success: false, message: error.message || 'Error de red' };
     }
